@@ -7,6 +7,7 @@ import (
 	"main/internal"
 	"net"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 )
@@ -30,7 +31,9 @@ func main() {
 
 	// 4.3. data server를 호스팅합니다.
 	s := new(DataServer)
-	gs := grpc.NewServer()
+	gs := grpc.NewServer(
+		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()), // 5.3. grpc에 unary interceptor를 추가합니다.
+	)
 	api.RegisterDataServer(gs, s)
 	if err := gs.Serve(l); err != nil {
 		log.Fatal(err)

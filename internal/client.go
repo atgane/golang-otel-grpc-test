@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -12,5 +13,6 @@ import (
 func CreateClient(ctx context.Context, addr string) (conn *grpc.ClientConn, err error) {
 	return grpc.DialContext(ctx, addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()), // 5.2. grpc에 unary interceptor를 추가합니다.
 	)
 }
