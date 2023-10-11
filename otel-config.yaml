@@ -1,0 +1,19 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+processors:
+  batch:
+
+exporters:
+  zipkin:
+    endpoint: "http://192.168.219.101:9411/api/v2/span"
+  logging:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [zipkin, logging]
