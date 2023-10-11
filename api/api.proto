@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "github.com/atgane/zrpc-server/api";
+
+service Data {
+    rpc Get(GetRequest) returns (GetResponse) {}
+}
+
+message GetRequest {
+    string key = 1;
+}
+
+message GetResponse {
+    string key = 1;
+}
