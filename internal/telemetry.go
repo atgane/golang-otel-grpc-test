@@ -1,18 +1,29 @@
 package internal
 
 import (
+	"context"
+
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func InitTrace() (*trace.TracerProvider, error) {
-	// 1.1. trace를 어떻게 노출시키는 방법을 정의하는 exporter를 선언합니다.
-	exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
+	ctx := context.Background()
+
+	// 6.1. opentelemetry collector로 전달하는 exporter를 선언합니다.
+	conn, err := grpc.DialContext(ctx, "localhost:4317", grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	if err != nil {
+		return nil, err
+	}
+
 	// 1.2. 동기적으로 span에 대한 정보를 exporter로 전달하는 processor를 생성합니다.
 	spanProcessor := trace.NewSimpleSpanProcessor(exporter)
 	// 1.3. tracer provider를 선언합니다.

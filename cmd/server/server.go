@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"main/api"
 	"main/internal"
@@ -48,6 +49,8 @@ type DataServer struct {
 func (d *DataServer) Get(ctx context.Context, req *api.GetRequest) (*api.GetResponse, error) {
 	_, span := tracer.Start(ctx, "receive message")
 	defer span.End()
+
+	fmt.Println("receive message")
 
 	res := &api.GetResponse{Key: "hi"}
 	return res, nil

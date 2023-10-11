@@ -8,7 +8,7 @@ processors:
 
 exporters:
   zipkin:
-    endpoint: "http://192.168.219.101:9411/api/v2/span"
+    endpoint: http://192.168.219.101:9411/api/v2/spans
   logging:
 
 service:
