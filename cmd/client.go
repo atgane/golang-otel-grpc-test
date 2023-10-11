@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"main/api"
 	"main/internal"
 
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -34,8 +36,33 @@ func someFunc1(ctx context.Context) {
 }
 
 func someFunc2(ctx context.Context) {
-	_, span := tracer.Start(ctx, "some func2")
+	ctx, span := tracer.Start(ctx, "some func2")
 	defer span.End()
 
 	fmt.Println("call func2")
+	callServer(ctx)
+}
+
+func callServer(ctx context.Context) {
+	ctx, span := tracer.Start(ctx, "call server")
+	defer span.End()
+
+	// 3.2. gRPC client를 생성합니다.
+	conn, err := internal.CreateClient(ctx, ":7777")
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return
+	}
+	defer conn.Close()
+
+	// 3.3. 요청을 전달합니다.
+	res, err := api.NewDataClient(conn).Get(ctx, &api.GetRequest{Key: "hello"})
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return
+	}
+
+	fmt.Println(res.Key)
 }
